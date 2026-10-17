@@ -1489,25 +1489,6 @@ jobs:
             cp "$image_path" ./AnyKernel3/Image
             cp "$image_path" kernel_workspace/kernel_platform/out/Final-Image-Find/Image
 
-            # ===== 直接在产物 Image 上重写 config_data.gz 段 =====
-            # 前面 filechk_cat 注入的 config_data 是干净的，但 Image 里仍是原始内容：
-            # ccache 不跟踪 .incbin 外部文件，configs.o 直接返回旧缓存，链接进 Image 的是旧段。
-            # 这里绕过 Kbuild / ccache，直接改二进制，改完立刻回读校验。
-            if [ -n "${CONFIG_FAKE_DISABLE:-}" ]; then
-              echo "[imgpatch] 待隐藏项: $CONFIG_FAKE_DISABLE"
-              IMGPATCH="$GITHUB_WORKSPACE/patch_image_cfg.py"
-              if [ ! -f "$IMGPATCH" ]; then
-                echo "[imgpatch] 工作区无脚本，从仓库拉取"
-                IMGPATCH=/tmp/patch_image_cfg.py
-                curl -fsSL -o "$IMGPATCH" \
-                  "https://raw.githubusercontent.com/wf200866/Action-Build/KernelSU/patch_image_cfg.py" \
-                  || { echo "❌ [imgpatch] 脚本下载失败" >&2; exit 1; }
-              fi
-              echo "[imgpatch] 脚本: $IMGPATCH ($(wc -c < "$IMGPATCH") 字节)"
-              python3 "$IMGPATCH" ./AnyKernel3/Image "$CONFIG_FAKE_DISABLE" || { echo "❌ [imgpatch] 失败，中止" >&2; exit 1; }
-            else
-              echo "[imgpatch] CONFIG_FAKE_DISABLE 为空，跳过"
-            fi
           fi
 
       - name: Apply KPX and Replace Image
@@ -1529,7 +1510,31 @@ jobs:
           fi
           mv -f oImage Image
           cp Image "${GITHUB_WORKSPACE}/AnyKernel3/Image"
-
+      - name: Hide CONFIG in Image
+        run: |
+          # 放在 KPN 之后、打包之前：kptools 会用 oImage 覆盖 AnyKernel3/Image，
+          # 早于它执行的话补丁会被盖掉。这一步无条件执行，不依赖 KPM 选择。
+          IMG="${GITHUB_WORKSPACE}/AnyKernel3/Image"
+          if [ ! -f "$IMG" ]; then
+            echo "[hidecfg] 找不到 $IMG，跳过"
+            exit 0
+          fi
+          if [ -z "${CONFIG_FAKE_DISABLE:-}" ]; then
+            echo "[hidecfg] CONFIG_FAKE_DISABLE 为空，跳过"
+            exit 0
+          fi
+          echo "[hidecfg] 待隐藏项: $CONFIG_FAKE_DISABLE"
+          SCRIPT="$GITHUB_WORKSPACE/patch_image_cfg.py"
+          if [ ! -f "$SCRIPT" ]; then
+            echo "[hidecfg] 工作区无脚本，从仓库拉取"
+            SCRIPT=/tmp/patch_image_cfg.py
+            curl -fsSL -o "$SCRIPT" \
+              "https://raw.githubusercontent.com/wf200866/Action-Build/KernelSU/patch_image_cfg.py" \
+              || { echo "[hidecfg] 脚本下载失败" >&2; exit 1; }
+          fi
+          echo "[hidecfg] 脚本: $SCRIPT ($(wc -c < "$SCRIPT") 字节)"
+          python3 "$SCRIPT" "$IMG" "$CONFIG_FAKE_DISABLE" || { echo "[hidecfg] 失败" >&2; exit 1; }
+          echo "[hidecfg] 完成"
       - name: Download Latest SUSFS Module from CI
         if: ${{ github.event.inputs.SUSFS_CI == 'CI' && github.event.inputs.SUSFS_META != '-1' }}
         continue-on-error: true
