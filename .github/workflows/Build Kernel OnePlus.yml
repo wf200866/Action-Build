@@ -1495,7 +1495,16 @@ jobs:
             # 这里绕过 Kbuild / ccache，直接改二进制，改完立刻回读校验。
             if [ -n "${CONFIG_FAKE_DISABLE:-}" ]; then
               echo "[imgpatch] 待隐藏项: $CONFIG_FAKE_DISABLE"
-              python3 "$GITHUB_WORKSPACE/patch_image_cfg.py" ./AnyKernel3/Image "$CONFIG_FAKE_DISABLE" || { echo "❌ [imgpatch] 失败，中止" >&2; exit 1; }
+              IMGPATCH="$GITHUB_WORKSPACE/patch_image_cfg.py"
+              if [ ! -f "$IMGPATCH" ]; then
+                echo "[imgpatch] 工作区无脚本，从仓库拉取"
+                IMGPATCH=/tmp/patch_image_cfg.py
+                curl -fsSL -o "$IMGPATCH" \
+                  "https://raw.githubusercontent.com/wf200866/Action-Build/KernelSU/patch_image_cfg.py" \
+                  || { echo "❌ [imgpatch] 脚本下载失败" >&2; exit 1; }
+              fi
+              echo "[imgpatch] 脚本: $IMGPATCH ($(wc -c < "$IMGPATCH") 字节)"
+              python3 "$IMGPATCH" ./AnyKernel3/Image "$CONFIG_FAKE_DISABLE" || { echo "❌ [imgpatch] 失败，中止" >&2; exit 1; }
             else
               echo "[imgpatch] CONFIG_FAKE_DISABLE 为空，跳过"
             fi
