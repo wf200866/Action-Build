@@ -1003,6 +1003,20 @@ jobs:
             tail -6 "$MAKEFILE" 2>/dev/null || echo "[fake_config] 读不到文件!"
             echo "[fake_config] 文件行数: $(wc -l < "$MAKEFILE" 2>/dev/null || echo '?')"
             echo "[fake_config] filechk_cat 出现次数: $(grep -c 'filechk_cat' "$MAKEFILE" 2>/dev/null || echo '?')"
+            # ccache 不跟踪 .incbin 引用的外部文件：configs.c 不变时 ccache 直接返回旧 .o，
+            # 导致 config_data.gz 更新了但 Image 里还是旧内容。改写注释戳强制 cache miss。
+            local CFG_C="kernel/configs.c"
+            if [ -f "$CFG_C" ]; then
+              local stamp="fake_cfg_stamp_${GITHUB_RUN_ID:-$(date +%s)}"
+              if grep -q 'fake_cfg_stamp_' "$CFG_C"; then
+                sed -i "s|/\* fake_cfg_stamp_[^*]*\*/|/* $stamp */|" "$CFG_C" 2>/dev/null || true
+              else
+                printf '\n/* %s */\n' "$stamp" >> "$CFG_C"
+              fi
+              echo "[fake_config] configs.c 戳: $(grep -o 'fake_cfg_stamp_[0-9]*' "$CFG_C" | tail -1)"
+            else
+              echo "[fake_config] 警告: 找不到 $CFG_C"
+            fi
             echo "CONFIG_FAKE_DISABLE=${HIDE_CONFIGS[*]}" >> "$GITHUB_ENV"
             echo "===== [fake_config] 结束 ====="
           }
@@ -1413,6 +1427,10 @@ jobs:
           tail -6 kernel/Makefile 2>/dev/null
           echo "===== [config 验证] 结束 ====="
 
+          # 强制重建 config_data 链路：ccache 会让 configs.o 命中旧缓存，
+          # 必须先删产物 + 源码戳已变，双保险
+          rm -f out/kernel/configs.o out/kernel/config_data.gz out/kernel/built-in.a 2>/dev/null || true
+          echo "[强制] 已删除 out/kernel/{configs.o,config_data.gz,built-in.a}"
           make -j"$(nproc --all)" O=out "${MAKE_ARGS[@]}"
 
           echo "===== [编译后验证] ====="
@@ -1420,6 +1438,14 @@ jobs:
           if [ -f out/kernel/config_data ]; then
             echo "[编译后] config_data 里的 KSU 状态:"
             grep -E 'KSU|IKHEADERS' out/kernel/config_data 2>/dev/null | head -15 || echo "  (无匹配)"
+          fi
+          # 关键验证：直接从最终 Image 二进制里提取 IKCFG_ST..IKCFG_ED 段并解压
+          # 中间文件正确不等于 Image 正确（ccache / .incbin 会让两者脱节）
+          IMG="out/arch/arm64/boot/Image"
+          echo "[Image验证] 目标: $IMG 存在=$([ -f "$IMG" ] && echo YES || echo NO)"
+          if [ -f "$IMG" ]; then
+            export IMG
+            python3 -c 'import os,zlib;d=open(os.environ["IMG"],"rb").read();i=d.find(b"IKCFG_ST");st=i+8;o=zlib.decompressobj(16+zlib.MAX_WBITS);out=o.decompress(d[st:st+500000]);L=out.decode("utf-8","ignore").split(chr(10));H=[l for l in L if "IKHEADERS" in l or l.startswith("CONFIG_KSU") or "WQ_POWER" in l];B=[l for l in L if l.startswith("CONFIG_KSU=") or "CONFIG_IKHEADERS=y" in l];print("[IMGV] 从 Image 提取",len(L),"行");print("[IMGV] i=",i);[print("   ",l) for l in H[:18]];print("[IMGV] !!! 仍有未隐藏项:" if B else "[IMGV] 全部命中项已隐藏 OK");[print("  XX",l) for l in B]'
           fi
           echo "===== [编译后验证] 结束 ====="
           ccache -s
