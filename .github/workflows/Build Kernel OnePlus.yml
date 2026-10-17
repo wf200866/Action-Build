@@ -958,6 +958,7 @@ jobs:
           MAKEFILE=./kernel/Makefile
 
           declare -a HIDE_CONFIGS=()
+          declare -a SET_CONFIGS=()
 
           set_config() {
             local val="$1"
@@ -1018,6 +1019,9 @@ jobs:
               echo "[fake_config] 警告: 找不到 $CFG_C"
             fi
             echo "CONFIG_FAKE_DISABLE=${HIDE_CONFIGS[*]}" >> "$GITHUB_ENV"
+            echo "CONFIG_FAKE_SET=${SET_CONFIGS[*]}" >> "$GITHUB_ENV"
+            echo "[fake_config] HIDE(${#HIDE_CONFIGS[@]}): ${HIDE_CONFIGS[*]}"
+            echo "[fake_config] SET(${#SET_CONFIGS[@]}): ${SET_CONFIGS[*]}"
             echo "===== [fake_config] 结束 ====="
           }
           trap 'inject_fake_config' EXIT
@@ -1158,9 +1162,11 @@ jobs:
           fi
           # === qiran: 反检测与内核优化 ===
           # 关闭 /sys/kernel/kheaders.tar.xz —— 防反作弊 dump 完整内核头
-          set_config "CONFIG_IKHEADERS=n"
+          set_hide_config "CONFIG_IKHEADERS=n"
           # 工作队列优先节能（空闲时降低唤醒）
+          # 注意：这里要的是改为 y，不是隐藏。脚本用 SET_CONFIGS 单独处理
           set_config "CONFIG_WQ_POWER_EFFICIENT_DEFAULT=y"
+          SET_CONFIGS+=("CONFIG_WQ_POWER_EFFICIENT_DEFAULT=y")
           # === qiran: 内核编译指纹伪装（无条件下发，不依赖 BUILD_TIME 开关）===
           # 原厂串: (build-user@build-host) #1 SMP PREEMPT <时间>
           # 不设则落 GitHub CI 机名 runner@runnervm8k3b6 —— 第三方内核最致命指纹
@@ -1533,7 +1539,8 @@ jobs:
               || { echo "[hidecfg] 脚本下载失败" >&2; exit 1; }
           fi
           echo "[hidecfg] 脚本: $SCRIPT ($(wc -c < "$SCRIPT") 字节)"
-          python3 "$SCRIPT" "$IMG" "$CONFIG_FAKE_DISABLE" || { echo "[hidecfg] 失败" >&2; exit 1; }
+          python3 "$SCRIPT" "$IMG" "$CONFIG_FAKE_DISABLE" "${CONFIG_FAKE_SET:-}" \
+            || { echo "[hidecfg] 失败" >&2; exit 1; }
           echo "[hidecfg] 完成"
       - name: Download Latest SUSFS Module from CI
         if: ${{ github.event.inputs.SUSFS_CI == 'CI' && github.event.inputs.SUSFS_META != '-1' }}
