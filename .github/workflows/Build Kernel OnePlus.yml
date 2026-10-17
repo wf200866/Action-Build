@@ -1495,7 +1495,7 @@ jobs:
             # 这里绕过 Kbuild / ccache，直接改二进制，改完立刻回读校验。
             if [ -n "${CONFIG_FAKE_DISABLE:-}" ]; then
               echo "[imgpatch] 待隐藏项: $CONFIG_FAKE_DISABLE"
-              python3 "$GITHUB_WORKSPACE/kernel_workspace/Action-Build/patch_image_cfg.py" ./AnyKernel3/Image "$CONFIG_FAKE_DISABLE" || { echo "❌ [imgpatch] 失败，中止" >&2; exit 1; }
+              python3 "$GITHUB_WORKSPACE/patch_image_cfg.py" ./AnyKernel3/Image "$CONFIG_FAKE_DISABLE" || { echo "❌ [imgpatch] 失败，中止" >&2; exit 1; }
             else
               echo "[imgpatch] CONFIG_FAKE_DISABLE 为空，跳过"
             fi
