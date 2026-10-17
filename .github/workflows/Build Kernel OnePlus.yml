@@ -1128,6 +1128,11 @@ jobs:
             set_config "CONFIG_RUST=y"
             set_config "CONFIG_ANDROID_BINDER_IPC_RUST=m"
           fi
+          # === qiran: 反检测与内核优化 ===
+          # 关闭 /sys/kernel/kheaders.tar.xz —— 防反作弊 dump 完整内核头
+          set_config "CONFIG_IKHEADERS=n"
+          # 工作队列优先节能（空闲时降低唤醒）
+          set_config "CONFIG_WQ_POWER_EFFICIENT_DEFAULT=y"
 
       # Custom kernel build time, without adding #1 SMP PREEMPT 自定义内核构建时间，不要加入#1 SMP PREEMPT
       - name: Custom BUILD_TIME
@@ -1144,6 +1149,10 @@ jobs:
           fi
           echo "KBUILD_BUILD_TIMESTAMP=${DATESTR}" >> "$GITHUB_ENV"
           echo "KBUILD_BUILD_VERSION=1" >> "$GITHUB_ENV"
+          # qiran: 伪装编译者/主机，消除 GitHub Actions CI 指纹
+          # 原厂串 = (build-user@build-host)，不设则落到 runner@runnervm8k3b6
+          echo "KBUILD_BUILD_USER=build-user" >> "$GITHUB_ENV"
+          echo "KBUILD_BUILD_HOST=build-host" >> "$GITHUB_ENV"
           cd kernel_workspace/kernel_platform/
           for f in ./common/scripts/mkcompile_h ./"$KERNEL_REPOS"/scripts/mkcompile_h; do
             if [ -f "$f" ]; then
