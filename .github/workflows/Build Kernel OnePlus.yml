@@ -980,17 +980,31 @@ jobs:
           }
 
           inject_fake_config() {
-            [ "${#HIDE_CONFIGS[@]}" -eq 0 ] && return 0
+            echo "===== [fake_config] 开始注入 ====="
+            echo "[fake_config] 工作目录: $(pwd)"
+            echo "[fake_config] MAKEFILE=$MAKEFILE"
+            echo "[fake_config] MAKEFILE 绝对路径: $(readlink -f "$MAKEFILE" 2>/dev/null || echo '解析失败')"
+            echo "[fake_config] MAKEFILE 存在? $([ -f "$MAKEFILE" ] && echo YES || echo NO)"
+            echo "[fake_config] HIDE_CONFIGS 数量: ${#HIDE_CONFIGS[@]}"
+            [ "${#HIDE_CONFIGS[@]}" -eq 0 ] && { echo "[fake_config] 空，跳过"; return 0; }
             local marker="# --- fake_config injector ---"
-            if ! grep -qF "$marker" "$MAKEFILE"; then
+            if ! grep -qF "$marker" "$MAKEFILE" 2>/dev/null; then
               {
                 printf '\n%s\n' "$marker"
                 printf 'ifneq ($(strip $(CONFIG_FAKE_DISABLE)),)\n'
                 printf 'override filechk_cat = sed $(foreach opt,$(CONFIG_FAKE_DISABLE),-e "s|^$(opt)=.*|# $(opt) is not set|") $<\n'
                 printf 'endif\n'
               } >> "$MAKEFILE"
+              echo "[fake_config] 注入写入完成"
+            else
+              echo "[fake_config] marker 已存在，跳过写入"
             fi
+            echo "[fake_config] 注入后文件尾部:"
+            tail -6 "$MAKEFILE" 2>/dev/null || echo "[fake_config] 读不到文件!"
+            echo "[fake_config] 文件行数: $(wc -l < "$MAKEFILE" 2>/dev/null || echo '?')"
+            echo "[fake_config] filechk_cat 出现次数: $(grep -c 'filechk_cat' "$MAKEFILE" 2>/dev/null || echo '?')"
             echo "CONFIG_FAKE_DISABLE=${HIDE_CONFIGS[*]}" >> "$GITHUB_ENV"
+            echo "===== [fake_config] 结束 ====="
           }
           trap 'inject_fake_config' EXIT
 
@@ -1372,7 +1386,42 @@ jobs:
           fi
 
           make O=out "${MAKE_ARGS[@]}" olddefconfig --no-print-directory
+
+          echo "===== [强制 config 修正] olddefconfig 之后改，改完不再 olddefconfig ====="
+          # 关键：olddefconfig 已经跑完，这里改的是最终 .config，改完直接编译
+          if [[ "$KERNEL_VERSION" == 5.* ]]; then
+            if grep -q '^CONFIG_IKHEADERS' out/.config; then
+              scripts/config --file out/.config -d IKHEADERS && echo "[强制] CONFIG_IKHEADERS -> n"
+            else
+              echo "[强制] out/.config 里没有 IKHEADERS 项"
+            fi
+            if grep -q '^CONFIG_WQ_POWER_EFFICIENT_DEFAULT' out/.config; then
+              scripts/config --file out/.config -e WQ_POWER_EFFICIENT_DEFAULT && echo "[强制] CONFIG_WQ_POWER_EFFICIENT_DEFAULT -> y"
+            fi
+            # 只同步 auto.conf 的依赖时间戳，不重算 config
+            # （make 编译时会自动 syncconfig，不会回退我们手改的值）
+            echo "[强制] 改完后的最终值:"
+            grep -E '^CONFIG_IKHEADERS|^# CONFIG_IKHEADERS|^CONFIG_WQ_POWER_EFFICIENT_DEFAULT' out/.config 2>/dev/null || echo "  (无匹配)"
+          fi
+          echo "===== [强制 config 修正] 结束 ====="
+          echo "[验证] out/.config 里的关键项:"
+          grep -E '^CONFIG_IKHEADERS=|^# CONFIG_IKHEADERS|^CONFIG_KSU=|^CONFIG_KSU_SUSFS=|^CONFIG_WQ_POWER_EFFICIENT_DEFAULT=' out/.config 2>/dev/null || echo "  (grep 无结果)"
+          echo "[验证] CONFIG_FAKE_DISABLE 环境变量: ${CONFIG_FAKE_DISABLE:-<空>}"
+          echo "[验证] kernel/Makefile 里的 filechk_cat:"
+          grep -n 'filechk_cat' kernel/Makefile 2>/dev/null || echo "  (无)"
+          echo "[验证] kernel/Makefile 尾部:"
+          tail -6 kernel/Makefile 2>/dev/null
+          echo "===== [config 验证] 结束 ====="
+
           make -j"$(nproc --all)" O=out "${MAKE_ARGS[@]}"
+
+          echo "===== [编译后验证] ====="
+          echo "[编译后] out/kernel/config_data 是否存在: $([ -f out/kernel/config_data ] && echo YES || echo NO)"
+          if [ -f out/kernel/config_data ]; then
+            echo "[编译后] config_data 里的 KSU 状态:"
+            grep -E 'KSU|IKHEADERS' out/kernel/config_data 2>/dev/null | head -15 || echo "  (无匹配)"
+          fi
+          echo "===== [编译后验证] 结束 ====="
           ccache -s
 
       - name: Fallback to Build Kernel
