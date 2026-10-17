@@ -996,7 +996,8 @@ jobs:
           trap 'inject_fake_config' EXIT
 
           # KernelSU配置
-          set_config "CONFIG_KSU=y"
+          # qiran: /proc/config.gz 里必须看不到 KSU/SUSFS，否则任何 App 一读就判定 root
+          set_hide_config "CONFIG_KSU=y"
 
           # KPM配置
           if [ "${{ github.event.inputs.KPM }}" = "KPM" ] || [ "${{ github.event.inputs.KPM }}" = "N/A" ]; then
@@ -1008,16 +1009,16 @@ jobs:
 
           # SUSFS配置
           if [ "${{ github.event.inputs.SUSFS_META }}" != "-1" ]; then
-            set_config "CONFIG_KSU_SUSFS=y"
-            set_config "CONFIG_KSU_SUSFS_SUS_PATH=y"
-            set_config "CONFIG_KSU_SUSFS_SUS_MAP=y"
-            set_config "CONFIG_KSU_SUSFS_SUS_MOUNT=y"
-            set_config "CONFIG_KSU_SUSFS_SUS_KSTAT=y"
-            set_config "CONFIG_KSU_SUSFS_SPOOF_UNAME=y"
-            set_config "CONFIG_KSU_SUSFS_ENABLE_LOG=y"
-            set_config "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y"
-            set_config "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y"
-            set_config "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y"
+            set_hide_config "CONFIG_KSU_SUSFS=y"
+            set_hide_config "CONFIG_KSU_SUSFS_SUS_PATH=y"
+            set_hide_config "CONFIG_KSU_SUSFS_SUS_MAP=y"
+            set_hide_config "CONFIG_KSU_SUSFS_SUS_MOUNT=y"
+            set_hide_config "CONFIG_KSU_SUSFS_SUS_KSTAT=y"
+            set_hide_config "CONFIG_KSU_SUSFS_SPOOF_UNAME=y"
+            set_hide_config "CONFIG_KSU_SUSFS_ENABLE_LOG=y"
+            set_hide_config "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y"
+            set_hide_config "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y"
+            set_hide_config "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y"
           else
             set_config "CONFIG_KSU_SUSFS=n"
           fi
