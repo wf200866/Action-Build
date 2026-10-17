@@ -1488,6 +1488,17 @@ jobs:
             echo "✅ Image file finally located at: $image_path"
             cp "$image_path" ./AnyKernel3/Image
             cp "$image_path" kernel_workspace/kernel_platform/out/Final-Image-Find/Image
+
+            # ===== 直接在产物 Image 上重写 config_data.gz 段 =====
+            # 前面 filechk_cat 注入的 config_data 是干净的，但 Image 里仍是原始内容：
+            # ccache 不跟踪 .incbin 外部文件，configs.o 直接返回旧缓存，链接进 Image 的是旧段。
+            # 这里绕过 Kbuild / ccache，直接改二进制，改完立刻回读校验。
+            if [ -n "${CONFIG_FAKE_DISABLE:-}" ]; then
+              echo "[imgpatch] 待隐藏项: $CONFIG_FAKE_DISABLE"
+              python3 "$GITHUB_WORKSPACE/kernel_workspace/Action-Build/patch_image_cfg.py" ./AnyKernel3/Image "$CONFIG_FAKE_DISABLE" || { echo "❌ [imgpatch] 失败，中止" >&2; exit 1; }
+            else
+              echo "[imgpatch] CONFIG_FAKE_DISABLE 为空，跳过"
+            fi
           fi
 
       - name: Apply KPX and Replace Image
