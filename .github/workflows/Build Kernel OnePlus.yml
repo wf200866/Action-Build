@@ -700,6 +700,17 @@ jobs:
           if [ -f kernel/Kbuild ]; then
             sed -i "s/DKSU_VERSION=16/DKSU_VERSION=${KSU_VERSION}/" kernel/Kbuild
           fi
+          # qiran: SukiSU builtin - kernel/Makefile else-branch -I misses klog.h
+          # force hardcoded include paths (same as upstream CONFIG_KSU_SUSFS=y branch)
+          if [ -f kernel/Makefile ] && [ "${{ github.event.inputs.KSU_REPO }}" == "sukisu" ]; then
+            if ! grep -q "drivers/kernelsu/include" kernel/Makefile; then
+              sed -i "2i ccflags-y += -I$(srctree)/drivers/kernelsu -I$(srctree)/drivers/kernelsu/include" kernel/Makefile
+              echo "[+] Makefile: injected hardcoded -I paths"
+            else
+              echo "[+] Makefile: -I already present"
+            fi
+            head -4 kernel/Makefile
+          fi
           if [ -f kernel/Makefile ]; then
             grep -q "KSU_VERSION=" kernel/Makefile || echo "ccflags-y += -DKSU_VERSION=${KSU_VERSION}" >> kernel/Makefile
           fi
@@ -1081,12 +1092,17 @@ jobs:
           # qiran: /proc/config.gz 里必须看不到 KSU/SUSFS，否则任何 App 一读就判定 root
           set_hide_config "CONFIG_KSU=y"
 
-          # KPM配置
-          if [ "${{ github.event.inputs.KPM }}" = "KPM" ] || [ "${{ github.event.inputs.KPM }}" = "N/A" ]; then
-            set_config "CONFIG_KPM=y"
-          fi
-          if [ "${{ github.event.inputs.KPM }}" = "KPN" ]; then
+          # KPM config
+          # qiran: Sukisu KPM uses old netlink cb_mutex, removed in 6.12 -> force off
+          if [ "${{ github.event.inputs.KSU_REPO }}" = "sukisu" ]; then
             set_config "CONFIG_KPM=n"
+          else
+            if [ "${{ github.event.inputs.KPM }}" = "KPM" ] || [ "${{ github.event.inputs.KPM }}" = "N/A" ]; then
+              set_config "CONFIG_KPM=y"
+            fi
+            if [ "${{ github.event.inputs.KPM }}" = "KPN" ]; then
+              set_config "CONFIG_KPM=n"
+            fi
           fi
 
           # SUSFS配置
