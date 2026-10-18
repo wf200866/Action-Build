@@ -56,8 +56,10 @@ for dp, dns, fns in os.walk(ROOT):
             open(p, 'w', encoding='utf-8', errors='surrogateescape').write(s)
             changed.append((p, cnt)); total += cnt
 
-# --- Kbuild：模块名 ---
-kb = os.path.join(ROOT, 'Kbuild')
+# --- Kbuild：模块名（位于 ROOT/kernel/Kbuild，不是 ROOT/Kbuild）---
+kb = os.path.join(ROOT, 'kernel', 'Kbuild')
+if not os.path.isfile(kb):
+    kb = os.path.join(ROOT, 'Kbuild')
 if os.path.isfile(kb):
     s = open(kb, encoding='utf-8', errors='surrogateescape').read()
     orig = s
