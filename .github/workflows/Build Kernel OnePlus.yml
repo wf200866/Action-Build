@@ -706,9 +706,59 @@ jobs:
             # qiran: single quotes required. $(srctree) in double quotes becomes bash command substitution.
             printf '%s\n' 'ccflags-y += -I$(srctree)/drivers/kernelsu -I$(srctree)/drivers/kernelsu/include' >> kernel/Makefile
             echo "[+] Makefile: appended hardcoded -I paths"
-            echo "--- verify ---"
-            tail -3 kernel/Makefile
-            echo "--------------"
+            if grep -q "const struct lsm_id \*lsmid" ../kernel_platform/common/include/linux/lsm_hooks.h 2>/dev/null; then
+              printf '%s\n' 'ccflags-y += -D__KSU_NEED_LSM_ID' >> kernel/Makefile
+              echo "[+] Makefile: -D__KSU_NEED_LSM_ID (6.1 lsm_id signature)"
+            else
+              echo "[+] Makefile: no lsm_id signature"
+            fi
+            echo "--- Makefile tail ---"
+            tail -4 kernel/Makefile
+            echo "--------------------"
+
+            # 兼容补丁脚本（base64 内联，避免 heredoc 破坏 YAML）
+            _SH=/tmp/fix_sukisu_gki61.sh
+            : > $_SH
+            printf '%s' 'IyEvYmluL2Jhc2gKIyBTdWtpU1UgVWx0cmEgYnVpbHRpbiDkuI4gQW5kcm9pZCBHS0kgNi4xIOeahCBBUEkg5YW85a656KGl5LiBCiMg55So5rOVOiBiYXNoIGZpeF9zdWtpc3VfZ2tpNjEuc2ggPGtlcm5lbF9wbGF0Zm9ybS9jb21tb24g6Lev5b6EPiBbS2VybmVs' >> $_SH
+            printf '%s' 'U1Ug55uu5b2VXQojIOS4pOS4quS/ruWkjeeCue+8mgojICAgMSkgc3Vsb2cvZXZlbnQuYyAgVVNFUl9BUkdfTlVMTCDov5Tlm57mjIfpkojvvIzkvYYga3N1X3N1bG9nX2NhcHR1cmUg5b2i5Y+C5piv57uT5p6E5L2T5YC8CiMgICAyKSBob29rL2xzbV9ob29rLmMg' >> $_SH
+            printf '%s' 'c2VjdXJpdHlfYWRkX2hvb2tzIOesrOS4ieWPguaVsOWcqCA2LjEg5Y+Y5Li6IGNvbnN0IHN0cnVjdCBsc21faWQgKgoKc2V0IC11CgpDT01NT049IiR7MTotfSIKS1NVRElSPSIkezI6LS59IgoKZWNobyAiPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09' >> $_SH
+            printf '%s' 'PT09PT09PT09IgplY2hvICJbZml4X3N1a2lzdV9na2k2MV0gQ09NTU9OPSRDT01NT04iCmVjaG8gIltmaXhfc3VraXN1X2draTYxXSBLU1VESVI9JEtTVURJUiIKZWNobyAiPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09IgoKaWYgWyAh' >> $_SH
+            printf '%s' 'IC1kICIkS1NVRElSIiBdOyB0aGVuCiAgZWNobyAiW0VSUl0gS2VybmVsU1UgZGlyIG5vdCBmb3VuZDogJEtTVURJUiIKICBleGl0IDEKZmkKCmNkICIkS1NVRElSIiB8fCBleGl0IDEKCiMgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t' >> $_SH
+            printf '%s' 'LS0tLS0tLS0tLS0tLS0tLS0tLS0tCiMg5o6i5rWLIHNlY3VyaXR5X2FkZF9ob29rcyDnmoTnrKzkuInlj4LmlbDnsbvlnosKIyAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KSEFTX0xTTUlEPTAK' >> $_SH
+            printf '%s' 'TFNNX0lEX0ZJRUxEPSIiCgppZiBbIC1uICIkQ09NTU9OIiBdICYmIFsgLWQgIiRDT01NT04iIF07IHRoZW4KICBmb3IgSCBpbiAiJENPTU1PTi9pbmNsdWRlL2xpbnV4L2xzbV9ob29rcy5oIiAiJENPTU1PTi9pbmNsdWRlL2xpbnV4L3NlY3VyaXR5LmgiICIkQ09N' >> $_SH
+            printf '%s' 'TU9OL3NlY3VyaXR5L3NlY3VyaXR5LmMiOyBkbwogICAgaWYgWyAtZiAiJEgiIF0gJiYgZ3JlcCAtcSAnY29uc3Qgc3RydWN0IGxzbV9pZCBcKmxzbWlkJyAiJEgiIDI+L2Rldi9udWxsOyB0aGVuCiAgICAgIGVjaG8gIltwcm9iZV0gbHNtX2lkIHNpZ25hdHVyZSBm' >> $_SH
+            printf '%s' 'b3VuZCBpbiAkSCIKICAgICAgSEFTX0xTTUlEPTEKICAgICAgYnJlYWsKICAgIGZpCiAgZG9uZQoKICAjIOaJviBzdHJ1Y3QgbHNtX2lkIOeahOWumuS5ie+8jOWPluesrOS4gOS4quaIkOWRmOWQjQogIGZvciBIIGluICIkQ09NTU9OL2luY2x1ZGUvbGludXgvbHNt' >> $_SH
+            printf '%s' 'X2hvb2tzLmgiICIkQ09NTU9OL2luY2x1ZGUvbGludXgvc2VjdXJpdHkuaCIgIiRDT01NT04vaW5jbHVkZS91YXBpL2xpbnV4L2xzbS5oIjsgZG8KICAgIGlmIFsgLWYgIiRIIiBdICYmIGdyZXAgLXEgJ3N0cnVjdCBsc21faWQgeycgIiRIIiAyPi9kZXYvbnVsbDsg' >> $_SH
+            printf '%s' 'dGhlbgogICAgICBlY2hvICJbcHJvYmVdIHN0cnVjdCBsc21faWQgZGVmaW5pdGlvbiBpbiAkSDoiCiAgICAgIGdyZXAgLUE4ICdzdHJ1Y3QgbHNtX2lkIHsnICIkSCIgfCBoZWFkIC0xMAogICAgICBMU01fSURfRklFTEQ9JChncmVwIC1BOCAnc3RydWN0IGxzbV9p' >> $_SH
+            printf '%s' 'ZCB7JyAiJEgiIFwKICAgICAgICB8IHNlZCAtbiAnMiw2cCcgXAogICAgICAgIHwgZ3JlcCAtb0UgJ1xiW2Etel9dW2EtejAtOV9dKlxzKjsnIFwKICAgICAgICB8IGhlYWQgLTEgfCB0ciAtZCAnIDsnKQogICAgICBlY2hvICJbcHJvYmVdIGZpcnN0IGZpZWxkID0g' >> $_SH
+            printf '%s' 'JyRMU01fSURfRklFTEQnIgogICAgICBicmVhawogICAgZmkKICBkb25lCmVsc2UKICBlY2hvICJbcHJvYmVdIENPTU1PTiBub3QgcHJvdmlkZWQgb3IgbWlzc2luZywgc2tpcCBwcm9iZSIKZmkKCiMgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t' >> $_SH
+            printf '%s' 'LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiMg5L+u5aSNIDE6IFVTRVJfQVJHX05VTEwKIyAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KaWYgWyAtZiBzdWxvZy9ldmVudC5jIF07IHRoZW4K' >> $_SH
+            printf '%s' 'ICBpZiBncmVwIC1xICcjZGVmaW5lIFVTRVJfQVJHX05VTEwgdXNlcl9hcmdfbnVsbF9wdHIoKScgc3Vsb2cvZXZlbnQuYzsgdGhlbgogICAgc2VkIC1pICdzLyNkZWZpbmUgVVNFUl9BUkdfTlVMTCB1c2VyX2FyZ19udWxsX3B0cigpLyNkZWZpbmUgVVNFUl9BUkdf' >> $_SH
+            printf '%s' 'TlVMTCAoKnVzZXJfYXJnX251bGxfcHRyKCkpLycgc3Vsb2cvZXZlbnQuYwogICAgZWNobyAiW1BBVENIMV0gc3Vsb2cvZXZlbnQuYzogVVNFUl9BUkdfTlVMTCAtPiAoKnVzZXJfYXJnX251bGxfcHRyKCkpICBPSyIKICBlbHNlCiAgICBlY2hvICJbUEFUQ0gxXSBz' >> $_SH
+            printf '%s' 'dWxvZy9ldmVudC5jOiBhbHJlYWR5IHBhdGNoZWQgb3IgcGF0dGVybiBhYnNlbnQiCiAgZmkKZWxzZQogIGVjaG8gIltQQVRDSDFdIHN1bG9nL2V2ZW50LmMgbm90IGZvdW5kLCBza2lwIgpmaQoKIyAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t' >> $_SH
+            printf '%s' 'LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KIyDkv67lpI0gMjogc2VjdXJpdHlfYWRkX2hvb2tzIOesrOS4ieWPguaVsAojIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQppZiBbIC1mIGhvb2sv' >> $_SH
+            printf '%s' 'bHNtX2hvb2suYyBdOyB0aGVuCiAgaWYgWyAiJEhBU19MU01JRCIgIT0gIjEiIF07IHRoZW4KICAgIGVjaG8gIltQQVRDSDJdIG5vIGxzbV9pZCBpbiBrZXJuZWwgaGVhZGVycywga2VlcCBvbGQgc2lnbmF0dXJlIgogIGVsaWYgZ3JlcCAtcSAnX19LU1VfTFNNX0lE' >> $_SH
+            printf '%s' 'X1BBVENIRUQnIGhvb2svbHNtX2hvb2suYzsgdGhlbgogICAgZWNobyAiW1BBVENIMl0gaG9vay9sc21faG9vay5jIGFscmVhZHkgcGF0Y2hlZCIKICBlbHNlCiAgICAjIOWGs+WumueUqOWTquS4quWtl+auteWQjeWBmuWIneWni+WMlgogICAgRklFTEQ9IiR7TFNN' >> $_SH
+            printf '%s' 'X0lEX0ZJRUxEOi1sc219IgogICAgZWNobyAiW1BBVENIMl0gdXNpbmcgLiRGSUVMRCA9IFwia3N1XCIiCgogICAgewogICAgICBlY2hvICcvKiBfX0tTVV9MU01fSURfUEFUQ0hFRDogQW5kcm9pZCBHS0kgNi4xIHNlY3VyaXR5X2FkZF9ob29rcyhjb25zdCBzdHJ1' >> $_SH
+            printf '%s' 'Y3QgbHNtX2lkICopICovJwogICAgICBlY2hvICcjaWZkZWYgX19LU1VfTkVFRF9MU01fSUQnCiAgICAgIGVjaG8gJ3N0YXRpYyBzdHJ1Y3QgbHNtX2lkIGtzdV9sc21pZCA9IHsnCiAgICAgIGVjaG8gIiAgICAuJEZJRUxEID0gXCJrc3VcIiwiCiAgICAgIGVjaG8g' >> $_SH
+            printf '%s' 'J307JwogICAgICBlY2hvICcjZW5kaWYnCiAgICAgIGNhdCBob29rL2xzbV9ob29rLmMKICAgIH0gPiAvdG1wL19raC5jCgogICAgbXYgL3RtcC9fa2guYyBob29rL2xzbV9ob29rLmMKICAgIGVjaG8gIltQQVRDSDJhXSBoZWFkZXIgYmxvY2sgaW5qZWN0ZWQiCgog' >> $_SH
+            printf '%s' 'ICAgIyDosIPnlKjngrnmm7/mjaLvvJrnlKggYXdrIOeyvuehruaUue+8jOS4jeeUqCBoZXJlZG9jCiAgICBhd2sgJwogICAgICAvc2VjdXJpdHlfYWRkX2hvb2tzXChrc3VfaG9va3MsIEFSUkFZX1NJWkVcKGtzdV9ob29rc1wpLCAia3N1IlwpOy8gewogICAgICAg' >> $_SH
+            printf '%s' 'IHByaW50ICIjaWZkZWYgX19LU1VfTkVFRF9MU01fSUQiCiAgICAgICAgcHJpbnQgIiAgICBzZWN1cml0eV9hZGRfaG9va3Moa3N1X2hvb2tzLCBBUlJBWV9TSVpFKGtzdV9ob29rcyksICZrc3VfbHNtaWQpOyIKICAgICAgICBwcmludCAiI2Vsc2UiCiAgICAgICAg' >> $_SH
+            printf '%s' 'cHJpbnQgIiAgICBzZWN1cml0eV9hZGRfaG9va3Moa3N1X2hvb2tzLCBBUlJBWV9TSVpFKGtzdV9ob29rcyksIFwia3N1XCIpOyIKICAgICAgICBwcmludCAiI2VuZGlmIgogICAgICAgIG5leHQKICAgICAgfQogICAgICB7IHByaW50IH0KICAgICcgaG9vay9sc21f' >> $_SH
+            printf '%s' 'aG9vay5jID4gL3RtcC9fa2gyLmMgJiYgbXYgL3RtcC9fa2gyLmMgaG9vay9sc21faG9vay5jCiAgICBlY2hvICJbUEFUQ0gyYl0gY2FsbCBzaXRlIHdyYXBwZWQiCiAgZmkKZWxzZQogIGVjaG8gIltQQVRDSDJdIGhvb2svbHNtX2hvb2suYyBub3QgZm91bmQsIHNr' >> $_SH
+            printf '%s' 'aXAiCmZpCgojIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQojIOWbnuaYvue7k+aenAojIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t' >> $_SH
+            printf '%s' 'LS0tLQplY2hvICItLS0gcmVzdWx0OiBzdWxvZy9ldmVudC5jIC0tLSIKZ3JlcCAtbiAnVVNFUl9BUkdfTlVMTCcgc3Vsb2cvZXZlbnQuYyAyPi9kZXYvbnVsbCB8IGhlYWQgLTMgfHwgdHJ1ZQplY2hvICItLS0gcmVzdWx0OiBob29rL2xzbV9ob29rLmMgLS0tIgpn' >> $_SH
+            printf '%s' 'cmVwIC1uICdrc3VfbHNtaWRcfHNlY3VyaXR5X2FkZF9ob29rc1x8X19LU1VfTFNNX0lEX1BBVENIRUQnIGhvb2svbHNtX2hvb2suYyAyPi9kZXYvbnVsbCB8IGhlYWQgLTEwIHx8IHRydWUKZWNobyAiPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09IgplY2hv' >> $_SH
+            printf '%s' 'ICJbZml4X3N1a2lzdV9na2k2MV0gZG9uZSIKZWNobyAiPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09IgpleGl0IDAK' >> $_SH
+            printf "\n" >> $_SH
+            base64 -d $_SH > ${_SH}.real 2>/dev/null && mv ${_SH}.real $_SH || true
+            if head -1 $_SH | grep -q "^#!/bin/bash"; then
+              echo "[+] patch script decoded OK"
+              bash $_SH "$(cd .. && pwd)/kernel_platform/common" . || echo "[!] patch script returned non-zero"
+            else
+              echo "[!] patch script decode failed, raw bytes:"
+              head -c 120 $_SH; echo
+            fi
           fi
           if [ -f kernel/Makefile ]; then
             grep -q "KSU_VERSION=" kernel/Makefile || echo "ccflags-y += -DKSU_VERSION=${KSU_VERSION}" >> kernel/Makefile
