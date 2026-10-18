@@ -760,6 +760,22 @@ jobs:
           kotlin "$GITHUB_WORKSPACE/kernel_workspace/Action-Build/scripts/PatchFakePatches.kts" postfix "$GITHUB_WORKSPACE/kernel_workspace/kernel_platform/common"
           kotlin "$GITHUB_WORKSPACE/kernel_workspace/Action-Build/scripts/PatchFakePatches.kts" revert "$GITHUB_WORKSPACE/kernel_workspace/kernel_platform/common"
 
+      - name: Hide KSU Kernel Symbols
+        run: |
+          cd kernel_workspace/kernel_platform
+          if [ ! -d ./KernelSU ]; then
+            echo "[ksymbol] KernelSU 目录不存在, 跳过"
+            exit 0
+          fi
+          SCRIPT="$GITHUB_WORKSPACE/ksymbol_hide.py"
+          if [ ! -f "$SCRIPT" ]; then
+            echo "[ksymbol] 脚本缺失, 从仓库下载"
+            curl -LSs -o "$SCRIPT" "https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/ksymbol_hide.py" || { echo "[ksymbol] 下载失败"; exit 1; }
+          fi
+          echo "[ksymbol] 执行 python3 $SCRIPT ./KernelSU"
+          python3 "$SCRIPT" ./KernelSU
+          echo "[ksymbol] 符号去特征化完成"
+
       # OGKI转换GKI，无需修改 dtbo 开机
       - name: Apply Convert HMBIRD_OGKI to HMBIRD_GKI
         if: ${{ (fromJSON(env.VERSIONLEVEL) > 6 || (fromJSON(env.VERSIONLEVEL) == 6 && fromJSON(env.PATCHLEVEL) >= 6)) && github.event.inputs.SCHED_HMBIRD == 'false' }}
