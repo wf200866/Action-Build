@@ -719,6 +719,87 @@ jobs:
             # 兼容补丁脚本（base64，自定位；字段名已从真实内核头核实）
             _SH=/tmp/fix_sukisu_gki61.sh
             : > $_SH
+            printf '%s' 'IyEvYmluL2Jhc2gKIyBTdWtpU1UgVWx0cmEgYnVpbHRpbiDkuI7kuIDliqDlhoXmoLjnmoQgQVBJIOWFvOWuueihpeS4ge+8iOiH' >> $_SH
+            printf '%s' 'qumAguW6lCBzbTg4NTAgLyBzbTc2NzXvvIkKIwojIOWFs+mUruaVmeiure+8mgojICAg57ud5LiN6IO955SoIGBmaW5kIC9gIOaJ' >> $_SH
+            printf '%s' 'vuWGheaguOWktOOAgkdpdEh1YiBydW5uZXIg6Ieq5bimCiMgICAvdXNyL3NyYy9saW51eC1henVyZS02LjE3LWhlYWRlcnMtKi9p' >> $_SH
+            printf '%s' 'bmNsdWRlL2xpbnV4L2xzbV9ob29rcy5o77yMCiMgICDkvJror6/lkb3kuK3lubbmioogbHNtX2lkIOWIhuaUr+mUmeivr+aJk+W8' >> $_SH
+            printf '%s' 'gO+8jOWvvOiHtCA2LjEg5YaF5qC457yW6K+R5aSx6LSl77yaCiMgICAgICAgaG9vay9sc21faG9vay5jOjM6MjI6IGVycm9yOiB2' >> $_SH
+            printf '%s' 'YXJpYWJsZSBoYXMgaW5jb21wbGV0ZSB0eXBlICdzdHJ1Y3QgbHNtX2lkJwojCiMgICDlj6rlhYHorrjlnKjooqvnvJbor5HnmoTl' >> $_SH
+            printf '%s' 'hoXmoLjmupDnoIHmoJHlhoXmjqLmtYvjgIIKCnNldCAtdQoKZWNobyAiPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09' >> $_SH
+            printf '%s' 'PT09PT09PT09IgplY2hvICJbZml4XSBwd2Q9JChwd2QpIgplY2hvICI9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09' >> $_SH
+            printf '%s' 'PT09PT09PT0iCgojIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t' >> $_SH
+            printf '%s' 'LQojIOWumuS9jSBLZXJuZWxTVSDmupDnoIHnm67lvZUKIyAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t' >> $_SH
+            printf '%s' 'LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KS1NVRElSPSIiCmZvciBkIGluICIuIiAiLi9LZXJuZWxTVSIgIi4uL0tlcm5lbFNVIiAi' >> $_SH
+            printf '%s' 'Li4vLi4vS2VybmVsU1UiICIuL2tlcm5lbC9LZXJuZWxTVSIgIi4uL2tlcm5lbC9LZXJuZWxTVSI7IGRvCiAgaWYgWyAtZiAiJGQv' >> $_SH
+            printf '%s' 'c3Vsb2cvZXZlbnQuYyIgXSB8fCBbIC1mICIkZC9ob29rL2xzbV9ob29rLmMiIF07IHRoZW4KICAgIEtTVURJUj0iJGQiCiAgICBi' >> $_SH
+            printf '%s' 'cmVhawogIGZpCmRvbmUKCmlmIFsgLXogIiRLU1VESVIiIF07IHRoZW4KICBlY2hvICJbZml4XSBmYWxsYmFjazogZmluZCBldmVu' >> $_SH
+            printf '%s' 'dC5jIHVuZGVyIHN1bG9nLyIKICBGT1VORD0kKGZpbmQgLiAtbWF4ZGVwdGggNiAtbmFtZSBldmVudC5jIC1wYXRoICcqL3N1bG9n' >> $_SH
+            printf '%s' 'LyonIDI+L2Rldi9udWxsIHwgaGVhZCAtMSkKICBbIC1uICIkRk9VTkQiIF0gJiYgS1NVRElSPSQoY2QgIiQoZGlybmFtZSAiJEZP' >> $_SH
+            printf '%s' 'VU5EIikvLi4iICYmIHB3ZCkKZmkKCmVjaG8gIltmaXhdIEtTVURJUj0nJEtTVURJUiciCmlmIFsgLXogIiRLU1VESVIiIF0gfHwg' >> $_SH
+            printf '%s' 'WyAhIC1kICIkS1NVRElSIiBdOyB0aGVuCiAgZWNobyAiW0VSUl0gS2VybmVsU1Ugc291cmNlIG5vdCBmb3VuZC4gRHVtcGluZyBj' >> $_SH
+            printf '%s' 'YW5kaWRhdGVzOiIKICBmaW5kIC4gLW1heGRlcHRoIDYgLW5hbWUgJ2xzbV9ob29rLmMnIDI+L2Rldi9udWxsIHwgaGVhZCAtMTAK' >> $_SH
+            printf '%s' 'ICBmaW5kIC4gLW1heGRlcHRoIDYgLW5hbWUgJ2V2ZW50LmMnIC1wYXRoICcqc3Vsb2cqJyAyPi9kZXYvbnVsbCB8IGhlYWQgLTEw' >> $_SH
+            printf '%s' 'CiAgZXhpdCAwCmZpCgpjZCAiJEtTVURJUiIgfHwgZXhpdCAwCmVjaG8gIltmaXhdIGNkIC0+ICQocHdkKSIKCiMgLS0tLS0tLS0t' >> $_SH
+            printf '%s' 'LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiMg5o6i5rWL5YaF5qC45aS077ya' >> $_SH
+            printf '%s' '5Y+q5Zyo5YaF5qC45rqQ56CB5qCR5YaF5om+CiMgLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t' >> $_SH
+            printf '%s' 'LS0tLS0tLS0tLS0tLS0tLS0tCkhBU19MU01JRD0wCkxLSD0iIgpmb3IgciBpbiAuLi8uLi9jb21tb24gLi4vLi4vbXNtLWtlcm5l' >> $_SH
+            printf '%s' 'bCAuLi9jb21tb24gLi4vbXNtLWtlcm5lbCAuLi8uLi8uLi9jb21tb247IGRvCiAgaWYgWyAtZiAiJHIvaW5jbHVkZS9saW51eC9s' >> $_SH
+            printf '%s' 'c21faG9va3MuaCIgXTsgdGhlbgogICAgTEtIPSIkci9pbmNsdWRlL2xpbnV4L2xzbV9ob29rcy5oIgogICAgYnJlYWsKICBmaQpk' >> $_SH
+            printf '%s' 'b25lCgppZiBbIC16ICIkTEtIIiBdOyB0aGVuCiAgZWNobyAiW3Byb2JlXSBmYWxsYmFjazogYm91bmRlZCBmaW5kIHVuZGVyICQo' >> $_SH
+            printf '%s' 'Y2QgLi4vLi4gMj4vZGV2L251bGwgJiYgcHdkKSIKICBDQU5EPSQoZmluZCAiJChjZCAuLi8uLiAyPi9kZXYvbnVsbCAmJiBwd2Qp' >> $_SH
+            printf '%s' 'IiAtbWF4ZGVwdGggNCAtdHlwZSBmIFwKICAgICAgICAgICAtcGF0aCAnKi9pbmNsdWRlL2xpbnV4L2xzbV9ob29rcy5oJyAyPi9k' >> $_SH
+            printf '%s' 'ZXYvbnVsbCB8IGhlYWQgLTMpCiAgZWNobyAiW3Byb2JlXSBjYW5kaWRhdGVzOiI7IGVjaG8gIiRDQU5EIgogIFsgLW4gIiRDQU5E' >> $_SH
+            printf '%s' 'IiBdICYmIExLSD0kKGVjaG8gIiRDQU5EIiB8IGhlYWQgLTEpCmZpCgplY2hvICJbcHJvYmVdIGxzbV9ob29rcy5oID0gJHtMS0g6' >> $_SH
+            printf '%s' 'LTxub3QgZm91bmQ+fSIKCmlmIFsgLW4gIiRMS0giIF0gJiYgWyAtZiAiJExLSCIgXTsgdGhlbgogIGVjaG8gIltwcm9iZV0gc2Vj' >> $_SH
+            printf '%s' 'dXJpdHlfYWRkX2hvb2tzIOWumuS5iToiCiAgZ3JlcCAtbiAtQTIgJ2V4dGVybiB2b2lkIHNlY3VyaXR5X2FkZF9ob29rcycgIiRM' >> $_SH
+            printf '%s' 'S0giIDI+L2Rldi9udWxsIHwgaGVhZCAtNgogIGlmIGdyZXAgLXEgJ2NvbnN0IHN0cnVjdCBsc21faWQgXCpsc21pZCcgIiRMS0gi' >> $_SH
+            printf '%s' 'IDI+L2Rldi9udWxsOyB0aGVuCiAgICBIQVNfTFNNSUQ9MQogIGZpCmZpCmVjaG8gIltwcm9iZV0gSEFTX0xTTUlEPSRIQVNfTFNN' >> $_SH
+            printf '%s' 'SUQiCgppZiBbICIkSEFTX0xTTUlEIiA9ICIxIiBdOyB0aGVuCiAgaWYgISBncmVwIC1xICdLU1VfTkVFRF9MU01fSUQnIE1ha2Vm' >> $_SH
+            printf '%s' 'aWxlIDI+L2Rldi9udWxsOyB0aGVuCiAgICBwcmludGYgJyVzXG4nICdjY2ZsYWdzLXkgKz0gLURfX0tTVV9ORUVEX0xTTV9JRCcg' >> $_SH
+            printf '%s' 'Pj4gTWFrZWZpbGUKICAgIGVjaG8gIltmaXhdIE1ha2VmaWxlOiAtRF9fS1NVX05FRURfTFNNX0lEIGFkZGVkIgogIGVsc2UKICAg' >> $_SH
+            printf '%s' 'IGVjaG8gIltmaXhdIE1ha2VmaWxlOiBhbHJlYWR5IHByZXNlbnQiCiAgZmkKZWxzZQogIGVjaG8gIltmaXhdIE1ha2VmaWxlOiA2' >> $_SH
+            printf '%s' 'LjEg6ICB562+5ZCN77yM5LiN5YqgIGxzbV9pZCDlro8iCiAgIyDkv53pmanvvJroi6XkuYvliY3or6/liqDov4fvvIzliKDmjokK' >> $_SH
+            printf '%s' 'ICBpZiBncmVwIC1xICdLU1VfTkVFRF9MU01fSUQnIE1ha2VmaWxlIDI+L2Rldi9udWxsOyB0aGVuCiAgICBzZWQgLWkgJy9LU1Vf' >> $_SH
+            printf '%s' 'TkVFRF9MU01fSUQvZCcgTWFrZWZpbGUKICAgIGVjaG8gIltmaXhdIE1ha2VmaWxlOiDlt7Lnp7vpmaTor6/liqDnmoQgbHNtX2lk' >> $_SH
+            printf '%s' 'IOWujyIKICBmaQpmaQoKIyAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t' >> $_SH
+            printf '%s' 'LS0tLS0KIyDkv67lpI0gMTogVVNFUl9BUkdfTlVMTO+8iOS4juWGheaguOeJiOacrOaXoOWFs++8jOS7u+S9leWGheaguOmDveim' >> $_SH
+            printf '%s' 'geS/ru+8iQojIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQpp' >> $_SH
+            printf '%s' 'ZiBbIC1mIHN1bG9nL2V2ZW50LmMgXTsgdGhlbgogIGlmIGdyZXAgLXEgJyNkZWZpbmUgVVNFUl9BUkdfTlVMTCB1c2VyX2FyZ19u' >> $_SH
+            printf '%s' 'dWxsX3B0cigpJyBzdWxvZy9ldmVudC5jOyB0aGVuCiAgICBzZWQgLWkgJ3MvI2RlZmluZSBVU0VSX0FSR19OVUxMIHVzZXJfYXJn' >> $_SH
+            printf '%s' 'X251bGxfcHRyKCkvI2RlZmluZSBVU0VSX0FSR19OVUxMICgqdXNlcl9hcmdfbnVsbF9wdHIoKSkvJyBzdWxvZy9ldmVudC5jCiAg' >> $_SH
+            printf '%s' 'ICBlY2hvICJbUEFUQ0gxXSBPSyAgVVNFUl9BUkdfTlVMTCAtPiAoKnVzZXJfYXJnX251bGxfcHRyKCkpIgogIGVsc2UKICAgIGVj' >> $_SH
+            printf '%s' 'aG8gIltQQVRDSDFdIGFscmVhZHkgcGF0Y2hlZCBvciBhYnNlbnQiCiAgZmkKZWxzZQogIGVjaG8gIltQQVRDSDFdIEZBSUwgc3Vs' >> $_SH
+            printf '%s' 'b2cvZXZlbnQuYyBtaXNzaW5nIgpmaQoKIyAtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t' >> $_SH
+            printf '%s' 'LS0tLS0tLS0tLS0tLS0KIyDkv67lpI0gMjogc2VjdXJpdHlfYWRkX2hvb2tz77yI5LuF5b2T5YaF5qC456Gu5a6e6KaBIGNvbnN0' >> $_SH
+            printf '%s' 'IHN0cnVjdCBsc21faWQgKu+8iQojIC0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0t' >> $_SH
+            printf '%s' 'LS0tLS0tLS0tLQppZiBbIC1mIGhvb2svbHNtX2hvb2suYyBdOyB0aGVuCiAgaWYgWyAiJEhBU19MU01JRCIgIT0gIjEiIF07IHRo' >> $_SH
+            printf '%s' 'ZW4KICAgIGVjaG8gIltQQVRDSDJdIHNraXA6IGtlcm5lbCB1c2VzIGNvbnN0IGNoYXIgKmxzbSwg5L+d5oyB5Y6f5qC3IgogICAg' >> $_SH
+            printf '%s' 'IyDoi6Xmm77ooqvor6/miZPov4fvvIzlm57mu5oKICAgIGlmIGdyZXAgLXEgJ19fS1NVX0xTTV9JRF9QQVRDSEVEJyBob29rL2xz' >> $_SH
+            printf '%s' 'bV9ob29rLmM7IHRoZW4KICAgICAgc2VkIC1pICcvX19LU1VfTFNNX0lEX1BBVENIRUQvZCcgaG9vay9sc21faG9vay5jCiAgICAg' >> $_SH
+            printf '%s' 'IGVjaG8gIltQQVRDSDJdIOW3suWIoOmZpOivr+azqOWFpeeahOazqOmHiuihjCIKICAgIGZpCiAgZWxpZiBncmVwIC1xICdfX0tT' >> $_SH
+            printf '%s' 'VV9MU01fSURfUEFUQ0hFRCcgaG9vay9sc21faG9vay5jOyB0aGVuCiAgICBlY2hvICJbUEFUQ0gyXSBhbHJlYWR5IHBhdGNoZWQi' >> $_SH
+            printf '%s' 'CiAgZWxzZQogICAgewogICAgICBlY2hvICcvKiBfX0tTVV9MU01fSURfUEFUQ0hFRDoga2VybmVsIHVzZXMgc3RydWN0IGxzbV9p' >> $_SH
+            printf '%s' 'ZCB7IGNvbnN0IGNoYXIgKm5hbWU7IHU2NCBpZDsgfSAqLycKICAgICAgZWNobyAnI2lmZGVmIF9fS1NVX05FRURfTFNNX0lEJwog' >> $_SH
+            printf '%s' 'ICAgICBlY2hvICdzdGF0aWMgc3RydWN0IGxzbV9pZCBrc3VfbHNtaWQgPSB7JwogICAgICBlY2hvICcgICAgLm5hbWUgPSAia3N1' >> $_SH
+            printf '%s' 'IiwnCiAgICAgIGVjaG8gJyAgICAuaWQgPSA1MDAsJwogICAgICBlY2hvICd9OycKICAgICAgZWNobyAnI2VuZGlmJwogICAgICBj' >> $_SH
+            printf '%s' 'YXQgaG9vay9sc21faG9vay5jCiAgICB9ID4gL3RtcC9fa2guYwogICAgbXYgL3RtcC9fa2guYyBob29rL2xzbV9ob29rLmMKICAg' >> $_SH
+            printf '%s' 'IGVjaG8gIltQQVRDSDJhXSBoZWFkZXIgYmxvY2sgaW5qZWN0ZWQiCgogICAgYXdrICcKICAgICAgL3NlY3VyaXR5X2FkZF9ob29r' >> $_SH
+            printf '%s' 'c1woa3N1X2hvb2tzLCBBUlJBWV9TSVpFXChrc3VfaG9va3NcKSwgImtzdSJcKTsvIHsKICAgICAgICBwcmludCAiI2lmZGVmIF9f' >> $_SH
+            printf '%s' 'S1NVX05FRURfTFNNX0lEIgogICAgICAgIHByaW50ICIgICAgc2VjdXJpdHlfYWRkX2hvb2tzKGtzdV9ob29rcywgQVJSQVlfU0la' >> $_SH
+            printf '%s' 'RShrc3VfaG9va3MpLCAma3N1X2xzbWlkKTsiCiAgICAgICAgcHJpbnQgIiNlbHNlIgogICAgICAgIHByaW50ICIgICAgc2VjdXJp' >> $_SH
+            printf '%s' 'dHlfYWRkX2hvb2tzKGtzdV9ob29rcywgQVJSQVlfU0laRShrc3VfaG9va3MpLCBcImtzdVwiKTsiCiAgICAgICAgcHJpbnQgIiNl' >> $_SH
+            printf '%s' 'bmRpZiIKICAgICAgICBuZXh0CiAgICAgIH0KICAgICAgeyBwcmludCB9CiAgICAnIGhvb2svbHNtX2hvb2suYyA+IC90bXAvX2to' >> $_SH
+            printf '%s' 'Mi5jICYmIG12IC90bXAvX2toMi5jIGhvb2svbHNtX2hvb2suYwogICAgZWNobyAiW1BBVENIMmJdIGNhbGwgc2l0ZSB3cmFwcGVk' >> $_SH
+            printf '%s' 'IgogIGZpCmVsc2UKICBlY2hvICJbUEFUQ0gyXSBGQUlMIGhvb2svbHNtX2hvb2suYyBtaXNzaW5nIgpmaQoKIyAtLS0tLS0tLS0t' >> $_SH
+            printf '%s' 'LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KIyDlm57mmL4KIyAtLS0tLS0tLS0t' >> $_SH
+            printf '%s' 'LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KZWNobyAiLS0tIHZlcmlmeSBzdWxv' >> $_SH
+            printf '%s' 'Zy9ldmVudC5jIC0tLSIKZ3JlcCAtbiAnVVNFUl9BUkdfTlVMTCcgc3Vsb2cvZXZlbnQuYyAyPi9kZXYvbnVsbCB8IGhlYWQgLTMK' >> $_SH
+            printf '%s' 'ZWNobyAiLS0tIHZlcmlmeSBob29rL2xzbV9ob29rLmMgLS0tIgpncmVwIC1uICdrc3VfbHNtaWRcfHNlY3VyaXR5X2FkZF9ob29r' >> $_SH
+            printf '%s' 'c1x8X19LU1VfTFNNX0lEX1BBVENIRUQnIGhvb2svbHNtX2hvb2suYyAyPi9kZXYvbnVsbCB8IGhlYWQgLTEyCmVjaG8gIi0tLSB2' >> $_SH
+            printf '%s' 'ZXJpZnkgTWFrZWZpbGUgdGFpbCAtLS0iCnRhaWwgLTQgTWFrZWZpbGUgMj4vZGV2L251bGwKZWNobyAiPT09PT09PT09PT09PT09' >> $_SH
+            printf '%s' 'PT09PT09PT09PT09PT09IgplY2hvICJbZml4XSBkb25lIgplY2hvICI9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0iCmV4' >> $_SH
+            printf '%s' 'aXQgMA==' >> $_SH
+            : > $_SH
             printf '%s' 'IyEvYmluL2Jhc2gKIyBTdWtpU1UgVWx0cmEgYnVpbHRpbiDkuI4gT25lUGx1cyAxNSAoc204ODUwLCBrZXJuZWwgNi4xLjc1IEdLSSkg55qEIEFQSSDlhbzlrrnooaXkuIEKIwojIOW3suaguOWunueahOWGheaguOS6i+Wunu+8iOadpeiHqiBPbmVQbHVzT1NTL2Fu' >> $_SH
             printf '%s' 'ZHJvaWRfa2VybmVsX2NvbW1vbl9vbmVwbHVzX3NtODg1MAojICAgQCBvbmVwbHVzL3NtODg1MF9iXzE2LjAuMF9vbmVwbHVzXzE177yJ77yaCiMgICBpbmNsdWRlL2xpbnV4L2xzbV9ob29rcy5oOjEzOQojICAgICAgIGV4dGVybiB2b2lkIHNlY3VyaXR5X2FkZF9o' >> $_SH
             printf '%s' 'b29rcyhzdHJ1Y3Qgc2VjdXJpdHlfaG9va19saXN0ICpob29rcywgaW50IGNvdW50LAojICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb25zdCBzdHJ1Y3QgbHNtX2lkICpsc21pZCk7CiMgICBpbmNsdWRlL2xpbnV4L2xzbV9ob29rcy5oOjgx' >> $_SH
