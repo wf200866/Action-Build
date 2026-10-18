@@ -91,12 +91,16 @@ else:
 # ---------- 3+4. drivers/Makefile 与软链接 ----------
 dad = None
 candidates = [
+    # kernel_platform/KernelSU -> kernel_platform/common/drivers
+    os.path.abspath(os.path.join(ROOT, '..', 'common', 'drivers', 'Makefile')),
+    os.path.abspath(os.path.join(ROOT, '..', '..', 'common', 'drivers', 'Makefile')),
     os.path.abspath(os.path.join(ROOT, '..', '..', 'drivers', 'Makefile')),
     os.path.abspath(os.path.join(ROOT, '..', 'drivers', 'Makefile')),
 ]
 for c in candidates:
     if os.path.isfile(c):
         dad = c
+        print('[ksymbol] drivers/Makefile = %s' % c)
         break
 
 if dad:
@@ -117,7 +121,8 @@ if dad:
     newlink = os.path.join(ddir, 'seccore')
     kdir = None
     for cand in (os.path.join(ROOT, 'kernel'),
-                 os.path.abspath(os.path.join(ROOT, '..', 'KernelSU', 'kernel'))):
+                 os.path.abspath(os.path.join(ROOT, '..', 'KernelSU', 'kernel')),
+                 os.path.abspath(os.path.join(ROOT, '..', '..', 'KernelSU', 'kernel'))):
         if os.path.isdir(cand):
             kdir = os.path.abspath(cand)   # 必须绝对路径，否则相对 drivers/ 解析错误
             break
