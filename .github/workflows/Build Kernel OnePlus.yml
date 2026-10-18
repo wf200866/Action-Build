@@ -98,9 +98,17 @@ on:
         description: "自定义构建时间(输入F使用UTCT或-1关闭)//Custom build time (Enter F to use UTCT, or -1 to disable)"
         required: false
         default: "Wed Jul 15 11:18:49 UTC 2026"
+      KSU_REPO:
+        type: choice
+        description: "KernelSU 仓库来源//KernelSU repository source"
+        required: true
+        default: kernelSU
+        options:
+          - kernelSU
+          - sukisu
       KSU_META:
         type: string
-        description: "管理器分支名(必填)/内置分支名(必填)/回退分支提交哈希版本(留空不修改)//Manager Branch name (Required) / Builtin branch name (Required) / Rollback branch commit hash version (Leave blank to not modify)"
+        description: "管理器分支名(必填)/内置分支名(必填)/回退分支提交哈希版本(留空不修改)//Manager Branch name (Required) / Builtin branch name (Required) / Rollback branch commit hash version (Leave blank to not modify). 仓库来源由 KSU_REPO 控制"
         required: false
         default: "main/main/"
       LZ4_UPDATE:
@@ -668,7 +676,16 @@ jobs:
           echo "KSU_BUILTIN_BRANCH=$KSU_BUILTIN_BRANCH" >> $GITHUB_ENV
           [[ -n "$MANUAL_HASH" ]] && echo "手动指定 hash: $MANUAL_HASH" || echo "手动指定 hash: 未启用"
 
-          curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/refs/heads/${KSU_MANAGER_BRANCH}/kernel/setup.sh" | bash -s "$KSU_BUILTIN_BRANCH"
+          # 仓库来源：tiann/KernelSU 或 SukiSU-Ultra/SukiSU-Ultra
+          if [[ "${{ github.event.inputs.KSU_REPO }}" == "sukisu" ]]; then
+            KSU_SETUP_REPO="SukiSU-Ultra/SukiSU-Ultra"
+            echo "[+] KSU 仓库来源: SukiSU Ultra"
+          else
+            KSU_SETUP_REPO="tiann/KernelSU"
+            echo "[+] KSU 仓库来源: KernelSU"
+          fi
+          echo "KSU_SETUP_REPO=$KSU_SETUP_REPO" >> $GITHUB_ENV
+          curl -LSs "https://raw.githubusercontent.com/${KSU_SETUP_REPO}/refs/heads/${KSU_MANAGER_BRANCH}/kernel/setup.sh" | bash -s "$KSU_BUILTIN_BRANCH"
           cd ./KernelSU
 
           if [[ -n "$MANUAL_HASH" ]]; then
@@ -676,13 +693,20 @@ jobs:
             git checkout "$MANUAL_HASH"
           fi
 
-          KSU_VERSION=$(expr $(curl -sI "https://api.github.com/repos/tiann/KernelSU/commits?sha=${KSU_MANAGER_BRANCH}&per_page=1" | grep -i "link:" | sed -n 's/.*page=\([0-9]*\)>; rel="last".*/\1/p') "+" 30000)
+          KSU_VERSION=$(expr $(curl -sI "https://api.github.com/repos/${KSU_SETUP_REPO}/commits?sha=${KSU_MANAGER_BRANCH}&per_page=1" | grep -i "link:" | sed -n 's/.*page=\([0-9]*\)>; rel="last".*/\1/p') "+" 30000)
           echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
           echo "ksuver=$KSU_VERSION" >> $GITHUB_OUTPUT
-          sed -i "s/DKSU_VERSION=16/DKSU_VERSION=${KSU_VERSION}/" kernel/Kbuild
+          # KernelSU 用 kernel/Kbuild，SukiSU Ultra 用 kernel/Makefile
+          if [ -f kernel/Kbuild ]; then
+            sed -i "s/DKSU_VERSION=16/DKSU_VERSION=${KSU_VERSION}/" kernel/Kbuild
+          fi
+          if [ -f kernel/Makefile ]; then
+            grep -q "KSU_VERSION=" kernel/Makefile || echo "ccflags-y += -DKSU_VERSION=${KSU_VERSION}" >> kernel/Makefile
+          fi
+          echo "[+] 内核侧版本号已写入"
 
       - name: Apply Fake Patches
-        if: ${{ github.event.inputs.SUSFS_META != '-1' }}
+        if: ${{ github.event.inputs.SUSFS_META != '-1' && github.event.inputs.KSU_REPO != 'sukisu' }}
         run: |
           kotlin "$GITHUB_WORKSPACE/kernel_workspace/Action-Build/scripts/PatchFakePatches.kts" apply "$GITHUB_WORKSPACE/kernel_workspace/kernel_platform/common"
 
@@ -691,7 +715,7 @@ jobs:
           FILE: ${{ github.event.inputs.FILE }}
         run: |
           cd kernel_workspace
-          if [ "${{ github.event.inputs.SUSFS_META }}" != "-1" ]; then
+          if [ "${{ github.event.inputs.SUSFS_META }}" != "-1" ] && [ "${{ github.event.inputs.KSU_REPO }}" != "sukisu" ]; then
             SUSFS_META="${{ github.event.inputs.SUSFS_META }}"
             git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-${{ env.KANDROID_VERSION }}-${{ env.KERNEL_VERSION }}${{ github.event.inputs.SUSFS_DEV == 'true' && '-dev' || '' }}
             cd susfs4ksu
@@ -714,7 +738,7 @@ jobs:
           fi
           git clone https://github.com/ShirkNeko/SukiSU_patch.git
           cd kernel_platform
-          if [ "${{ github.event.inputs.SUSFS_META }}" != "-1" ]; then
+          if [ "${{ github.event.inputs.SUSFS_META }}" != "-1" ] && [ "${{ github.event.inputs.KSU_REPO }}" != "sukisu" ]; then
             echo "正在拉取susfs补丁"
             cp ../susfs4ksu/kernel_patches/50_add_susfs_in_gki-${{ env.KANDROID_VERSION }}-${{ env.KERNEL_VERSION }}.patch ./common/
             cp ../susfs4ksu/kernel_patches/KernelSU/10_enable_susfs_for_ksu.patch ./KernelSU/
@@ -730,7 +754,7 @@ jobs:
             cp -r ../SukiSU_patch/other/zram/lz4k_oplus ./common/lib/
           fi
 
-          if [ "${{ github.event.inputs.SUSFS_META }}" != "-1" ]; then
+          if [ "${{ github.event.inputs.SUSFS_META }}" != "-1" ] && [ "${{ github.event.inputs.KSU_REPO }}" != "sukisu" ]; then
             cd ./KernelSU
             sed -i 's|kernel/Makefile|kernel/Kbuild|g' ./10_enable_susfs_for_ksu.patch
             patch -p1 < 10_enable_susfs_for_ksu.patch || true
@@ -746,7 +770,7 @@ jobs:
             echo "fix_5.15_patch完成"
           fi
 
-          if [ "${{ github.event.inputs.SUSFS_META }}" != "-1" ]; then
+          if [ "${{ github.event.inputs.SUSFS_META }}" != "-1" ] && [ "${{ github.event.inputs.KSU_REPO }}" != "sukisu" ]; then
             echo "正在打susfs补丁"
             patch -p1 < 50_add_susfs_in_gki-${{ env.KANDROID_VERSION }}-${{ env.KERNEL_VERSION }}.patch || true
             echo "susfs_patch完成"
@@ -755,12 +779,13 @@ jobs:
           check_rejects .
 
       - name: Revert and Postfix Fake Patches
-        if: ${{ github.event.inputs.SUSFS_META != '-1' }}
+        if: ${{ github.event.inputs.SUSFS_META != '-1' && github.event.inputs.KSU_REPO != 'sukisu' }}
         run: |
           kotlin "$GITHUB_WORKSPACE/kernel_workspace/Action-Build/scripts/PatchFakePatches.kts" postfix "$GITHUB_WORKSPACE/kernel_workspace/kernel_platform/common"
           kotlin "$GITHUB_WORKSPACE/kernel_workspace/Action-Build/scripts/PatchFakePatches.kts" revert "$GITHUB_WORKSPACE/kernel_workspace/kernel_platform/common"
 
       - name: Hide KSU Kernel Symbols
+        if: ${{ github.event.inputs.KSU_REPO != 'sukisu' }}
         run: |
           cd kernel_workspace/kernel_platform
           if [ ! -d ./KernelSU ]; then
@@ -1055,7 +1080,7 @@ jobs:
           fi
 
           # SUSFS配置
-          if [ "${{ github.event.inputs.SUSFS_META }}" != "-1" ]; then
+          if [ "${{ github.event.inputs.SUSFS_META }}" != "-1" ] && [ "${{ github.event.inputs.KSU_REPO }}" != "sukisu" ]; then
             set_hide_config "CONFIG_KSU_SUSFS=y"
             set_hide_config "CONFIG_KSU_SUSFS_SUS_PATH=y"
             set_hide_config "CONFIG_KSU_SUSFS_SUS_MAP=y"
@@ -1559,7 +1584,7 @@ jobs:
             || { echo "[hidecfg] 失败" >&2; exit 1; }
           echo "[hidecfg] 完成"
       - name: Download Latest SUSFS Module from CI
-        if: ${{ github.event.inputs.SUSFS_CI == 'CI' && github.event.inputs.SUSFS_META != '-1' }}
+        if: ${{ github.event.inputs.SUSFS_CI == 'CI' && github.event.inputs.SUSFS_META != '-1' && github.event.inputs.KSU_REPO != 'sukisu' }}
         continue-on-error: true
         run: |
           LATEST_RUN_ID=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
@@ -1579,7 +1604,7 @@ jobs:
           fi
 
       - name: Download Latest SUSFS Module from Release
-        if: ${{ github.event.inputs.SUSFS_CI == 'Release' && github.event.inputs.SUSFS_META != '-1' }}
+        if: ${{ github.event.inputs.SUSFS_CI == 'Release' && github.event.inputs.SUSFS_META != '-1' && github.event.inputs.KSU_REPO != 'sukisu' }}
         continue-on-error: true
         run: |
           wget -O ksu_module_susfs_1.5.2+_Release.zip https://github.com/sidex15/ksu_module_susfs/releases/latest/download/ksu_module_susfs_1.5.2+.zip
