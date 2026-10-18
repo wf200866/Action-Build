@@ -704,6 +704,16 @@ jobs:
             grep -q "KSU_VERSION=" kernel/Makefile || echo "ccflags-y += -DKSU_VERSION=${KSU_VERSION}" >> kernel/Makefile
           fi
           echo "[+] 内核侧版本号已写入"
+          # SukiSU Ultra builtin: supercall.h uses #include "uapi/xxx.h"
+          # driver dir is a symlink; add uapi here pointing to the real dir
+          if [ -d kernel/include/uapi ]; then
+            UAPI_REAL="$(pwd)/kernel/include/uapi"
+            for d in $(find .. -maxdepth 3 -type l -name kernelsu 2>/dev/null); do
+              if [ ! -e "$d/uapi" ]; then
+                ln -sfn "$UAPI_REAL" "$d/uapi" && echo "[+] uapi -> $d/uapi"
+              fi
+            done
+          fi
 
       - name: Apply Fake Patches
         if: ${{ github.event.inputs.SUSFS_META != '-1' && github.event.inputs.KSU_REPO != 'sukisu' }}
