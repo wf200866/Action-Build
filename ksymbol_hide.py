@@ -78,19 +78,36 @@ CODE_MAP = {
     # --- 第二批：静态变量 ---
     'throne_tracker_mutex': 'mgr_track_mutex',
     'allowlist_mutex': 'perm_mutex',
-    # 源码名是 first_zygote / init_second_stage_executed，
-    # LTO 提升后变成了 is_first_zygote / is_init_second_stage_not_executed
+    # ksu10.patch 把函数内 static 提升成了全局 static_key，
+    # 名字变成 is_* 前缀（构建机上的实际形态）；
+    # 未打补丁的上游源码则是 first_zygote / init_second_stage_executed。
+    # 两个形态都要覆盖。
+    'is_init_second_stage_not_executed': 'stage_done_b',
+    'is_first_zygote': 'stage_flag_a',
     'init_second_stage_executed': 'stage_done_b',
     'first_zygote': 'stage_flag_a',
 }
 
-SKIP_DIRS = {'.git', 'manager', 'userspace', 'website', '.github', 'preinit'}
+# 注意：'manager' 不能跳过 —— kernel/manager/throne_tracker.c 里有
+# throne_tracker_mutex，它会进 kallsyms。早期版本误跳过导致漏改。
+# 顶层 ROOT 下的 manager/（管理器 UI，Kotlin）用路径判断排除，见下方 in_kernel_code。
+SKIP_DIRS = {'.git', 'userspace', 'website', '.github', 'preinit'}
+
+
+def is_manager_ui(path):
+    """ROOT/manager 是 KernelSU 管理器（Kotlin/Java），不改；
+    但 ROOT/kernel/manager 是内核代码，必须改。"""
+    rel = os.path.relpath(path, ROOT).replace(os.sep, '/')
+    return rel == 'manager' or rel.startswith('manager/')
+
+
 changed = []
 total = 0
 
 # ---------- 1. 代码符号 ----------
 for dp, dns, fns in os.walk(ROOT):
-    dns[:] = [d for d in dns if d not in SKIP_DIRS]
+    dns[:] = [d for d in dns
+              if d not in SKIP_DIRS and not is_manager_ui(os.path.join(dp, d))]
     for fn in fns:
         if not fn.endswith(('.c', '.h')):
             continue
@@ -190,7 +207,8 @@ for p, c in changed:
 # ---------- 校验 ----------
 left = []
 for dp, dns, fns in os.walk(ROOT):
-    dns[:] = [d for d in dns if d not in SKIP_DIRS]
+    dns[:] = [d for d in dns
+              if d not in SKIP_DIRS and not is_manager_ui(os.path.join(dp, d))]
     for fn in fns:
         if not fn.endswith(('.c', '.h')):
             continue
