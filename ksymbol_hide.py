@@ -23,6 +23,15 @@ MAP = {
     'anon_ksu_fops':      'anon_dev_fops',
     'ksu_sid':            'special_sid',
     'ksu_cred':           'special_cred',
+    'ksu_file_sid':       'special_file_sid',
+    'ksu_ioctl':          'special_ioctl',
+    'ksu_release':        'special_release',
+    'ksu_fops':           'special_fops',
+    'ksu_install_fd':     'special_install_fd',
+    'ksu_supercall_handle_ioctl': 'special_handle_ioctl',
+    'ksu_supercall_dump_commands': 'special_dump_commands',
+    'ksu_handle_supercall': 'special_handle_supercall',
+    'ksu_supercall_init':  'special_init',
 }
 
 SKIP_DIRS = {'.git', 'manager', 'userspace', 'website', '.github'}
