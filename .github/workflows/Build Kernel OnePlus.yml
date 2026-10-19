@@ -186,6 +186,11 @@ on:
         description: "是否停用此次缓存？//Disable caching for this build?"
         required: true
         default: false
+      KERNEL_COMMIT:
+        type: string
+        description: "内核源码锁定到指定 commit（key=value 逗号分隔，留空则用分支 HEAD）//Pin kernel source to specific commits"
+        required: false
+        default: ""
 
 jobs:
   build:
@@ -474,7 +479,37 @@ jobs:
           repo init -u "$BASE_URL" -b "$MANIFEST_BRANCH" -m "${FILE}.xml" --depth=1 --no-clone-bundle --no-tags
           sed -i -e '/prebuilts\/asuite"/{/ks-kernel\.lnx\.5\.0\.r3-rel/d}' -e '/tools\/tradefederation\/prebuilts"/{/ks-kernel\.lnx\.5\.0\.r3-rel/d}' ".repo/manifests/${FILE}.xml"
           repo sync -c -j$(nproc) --no-clone-bundle --no-tags --force-sync
-
+          # ===== 可选：把内核源码锁定到指定 commit =====
+          # 用途：让源码版本与目标设备的内核版本严格一致，避免 vermagic / 符号 CRC 不匹配
+          KC="${{ github.event.inputs.KERNEL_COMMIT }}"
+          if [ -n "$KC" ]; then
+            echo "🔒 KERNEL_COMMIT=$KC"
+            IFS=',' read -ra _pairs <<< "$KC"
+            for _p in "${_pairs[@]}"; do
+              _k=$(echo "$_p" | cut -d= -f1 | tr -d ' ')
+              _v=$(echo "$_p" | cut -d= -f2- | tr -d ' ')
+              _dir=""
+              case "$_k" in
+                common)   _dir="kernel_platform/common" ;;
+                msm)      _dir="kernel_platform/msm-kernel" ;;
+                modules)  _dir="." ;;
+                *) echo "⚠️ 未知 key: $_k"; continue ;;
+              esac
+              [[ -z "$_v" ]] && { echo "⚠️ $_k 的 commit 为空，跳过"; continue; }
+              echo "  → $_k ($_dir) -> ${_v:0:12}"
+              cd "$_dir"
+              git fetch origin --depth=1 "$_v" 2>/dev/null || git fetch origin "$_v"
+              git checkout -q FETCH_HEAD || { echo "❌ checkout $_v 失败"; cd - >/dev/null; exit 12; }
+              echo "     HEAD = $(git rev-parse --short=12 HEAD)"
+              cd - >/dev/null
+            done
+            echo "✅ 源码已锁定"
+            echo "   common : $(cd kernel_platform/common && git rev-parse --short=12 HEAD)"
+            echo "   msm    : $(cd kernel_platform/msm-kernel && git rev-parse --short=12 HEAD)"
+            echo "   kernel : $(awk '/^VERSION =/ {print $3}' kernel_platform/common/Makefile).$(awk '/^PATCHLEVEL =/ {print $3}' kernel_platform/common/Makefile).$(awk '/^SUBLEVEL =/ {print $3}' kernel_platform/common/Makefile)"
+          else
+            echo "ℹ️ KERNEL_COMMIT 为空，使用分支 HEAD"
+          fi
           KERNEL_REPOS=""
           KERNEL_REPOS_PATH=$(find . -type f -name "build.config.msm.common" | head -n 1)
           if [[ -n "$KERNEL_REPOS_PATH" ]]; then
