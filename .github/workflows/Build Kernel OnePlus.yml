@@ -1695,25 +1695,59 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           MANAGER_ARTIFACT=manager
-
-          echo "Using branch: $KSU_MANAGER_BRANCH"
-          echo "Downloading artifact: $MANAGER_ARTIFACT"
-
-          run_id=$(gh api "repos/tiann/KernelSU/actions/workflows/build-manager.yml/runs?branch=$KSU_MANAGER_BRANCH&status=success&event=push&per_page=1" --jq '.workflow_runs[0].id' || echo "")
-
+          # 按 KSU_REPO 决定管理器来源，避免管理器与内核版本对不上
+          if [[ "${{ github.event.inputs.KSU_REPO }}" == "sukisu" ]]; then
+            MGR_REPO="SukiSU-Ultra/SukiSU-Ultra"
+            MGR_WF="build-manager.yml"
+            MGR_BRANCH="${KSU_MANAGER_BRANCH:-main}"
+          else
+            MGR_REPO="tiann/KernelSU"
+            MGR_WF="build-manager.yml"
+            MGR_BRANCH="${KSU_MANAGER_BRANCH:-main}"
+          fi
+          echo "管理器来源: $MGR_REPO (branch=$MGR_BRANCH)"
+          run_id=""
+          # 先试 push 事件
+          for _ev in push workflow_dispatch; do
+            run_id=$(gh api "repos/$MGR_REPO/actions/workflows/$MGR_WF/runs?branch=$MGR_BRANCH&status=success&event=$_ev&per_page=1" --jq '.workflow_runs[0].id' 2>/dev/null || echo "")
+            [[ -n "$run_id" && "$run_id" != "null" ]] && break
+            run_id=""
+          done
+          # 仍为空则不限定分支再试
           if [[ -z "$run_id" ]]; then
-            echo "No successful workflow run found on branch $KSU_MANAGER_BRANCH. Skipping download."
+            run_id=$(gh api "repos/$MGR_REPO/actions/workflows/$MGR_WF/runs?status=success&event=push&per_page=1" --jq '.workflow_runs[0].id' 2>/dev/null || echo "")
+            [[ "$run_id" == "null" ]] && run_id=""
+          fi
+          if [[ -z "$run_id" ]]; then
+            echo "❌ 未找到成功的 manager 构建，改为从 release 下载"
+            REL_JSON=$(gh api "repos/$MGR_REPO/releases/latest" 2>/dev/null || echo "")
+            if [[ -n "$REL_JSON" ]]; then
+              APK_URL=$(echo "$REL_JSON" | jq -r '.assets[] | select(.name|endswith(".apk")) | .browser_download_url' | head -n1)
+              if [[ -n "$APK_URL" && "$APK_URL" != "null" ]]; then
+                echo "从 release 下载: $APK_URL"
+                curl -fL -o manager.apk "$APK_URL"
+                cp -f manager.apk ./AnyKernel3/
+              fi
+            fi
             exit 0
           fi
-          artifact_url=$(gh api "repos/tiann/KernelSU/actions/runs/$run_id/artifacts" | jq -r ".artifacts[] | select(.name == \"$MANAGER_ARTIFACT\") | .archive_download_url" | head -n1)
-
-          if [[ -z "$artifact_url" ]]; then
-            echo "No artifact '$MANAGER_ARTIFACT' found in run $run_id. Skipping download."
+          echo "run_id=$run_id"
+          artifact_url=$(gh api "repos/$MGR_REPO/actions/runs/$run_id/artifacts" | jq -r ".artifacts[] | select(.name == \"$MANAGER_ARTIFACT\") | .archive_download_url" | head -n1)
+          if [[ -z "$artifact_url" || "$artifact_url" == "null" ]]; then
+            echo "该 run 无 $MANAGER_ARTIFACT 产物，尝试从 release 兜底"
+            REL_JSON=$(gh api "repos/$MGR_REPO/releases/latest" 2>/dev/null || echo "")
+            APK_URL=$(echo "$REL_JSON" | jq -r '.assets[] | select(.name|endswith(".apk")) | .browser_download_url' | head -n1)
+            if [[ -n "$APK_URL" && "$APK_URL" != "null" ]]; then
+              curl -fL -o manager.apk "$APK_URL"
+              cp -f manager.apk ./AnyKernel3/
+            fi
             exit 0
           fi
-          echo "Downloading from: $artifact_url"
+          echo "artifact_url=$artifact_url"
           curl -fL -H "Authorization: token $GITHUB_TOKEN" -o "${MANAGER_ARTIFACT}.zip" "$artifact_url"
-          unzip -j "${MANAGER_ARTIFACT}.zip" "*.apk" -d ./AnyKernel3/
+          unzip -o -j "${MANAGER_ARTIFACT}.zip" "*.apk" -d ./AnyKernel3/
+          echo "=== AnyKernel3 内 APK ==="
+          ls -l ./AnyKernel3/*.apk 2>/dev/null || echo "⚠️ 仍无 APK"
 
       - name: Set zip Suffix
         id: suffix
